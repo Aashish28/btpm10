@@ -1,0 +1,95 @@
+_schema-version: "3.2"
+ID: hellomta
+version: 0.0.1
+modules:
+- name: hellomta-approuter
+  type: javascript.nodejs
+  path: hellomta-approuter
+  properties:
+    TENANT_HOST_PATTERN: ^(.*)-${appname}.${default-domain}
+  requires:
+  - name: hellomta_html_repo_runtime
+  - name: uaa_hellomta
+  - name: saas-registry
+  - name: hellomta-destination-service
+    group: destinations
+    properties:
+      forwardAuthToken: false
+      name: ui5
+      url: https://ui5.sap.com
+  parameters:
+    disk-quota: 512M
+    keep-existing-routes: true
+    memory: 512M
+    routes:
+    - route: https://${subdomain}-${appname}.${default-domain}
+    - route: https://consumer-mmfbi0bx-${appname}.${default-domain}
+- name: hellomta-app-content
+  type: com.sap.application.content
+  path: hellomta-app-content
+  requires:
+  - name: hellomta_html_repo_host
+    parameters:
+      content-target: true
+resources:
+- name: hellomta_html_repo_runtime
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: ${appname}-hellomta_html_repo_runtime
+    service-plan: app-runtime
+- name: uaa_hellomta
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: ${appname}-xsuaa-service
+    service-plan: application
+- name: hellomta_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      sizeLimit: 8
+    service: html5-apps-repo
+    service-name: ${appname}-hellomta_html_repo_host
+    service-plan: app-host
+- name: hellomta-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: false
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            HTML5.DynamicDestination: true
+            HTML5.ForwardAuthToken: true
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: hellomta-destination-service
+    service-plan: lite
+- name: saas-registry
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      appName: ${appname}
+      appUrls:
+        getDependencies: https://${subdomain}-${appname}.${default-domain}/callback/v1.0/dependencies
+        onSubscription: https://${subdomain}-${appname}.${default-domain}/callback/v1.0/tenants/{tenantId}
+      category: Custom Apps
+      description: A hello MTA app to explain the concepts of Multitenancy
+      displayName: HelloMTA
+      xsappname: ${appname}
+    service: saas-registry
+    service-name: ${appname}-saas-registry
+    service-plan: application
+parameters:
+  appname: hellomta
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+  subdomain: 20ca595atrial

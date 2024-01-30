@@ -1,0 +1,21 @@
+manifest-Version: 1.0
+Created-By: SAP Application Archive Builder 1.2.18
+
+Name: hellomta-approuter/data.zip
+MTA-Module: hellomta-approuter
+Content-Type: application/zip
+
+
+Name: hellomta-app-content/resources/data.zip
+MTA-Module: hellomta-app-content
+Content-Type: application/zip
+
+
+Name: xs-security.json
+MTA-Resource: uaa_hellomta
+Content-Type: application/json
+
+
+Name: META-INF/mtad.yaml
+Content-Type: text/plain
+
